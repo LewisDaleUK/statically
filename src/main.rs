@@ -1,6 +1,6 @@
+use pulldown_cmark::{html, Options, Parser};
 use std::fs;
 use std::path::{Path, PathBuf};
-use pulldown_cmark::{Parser, Options, html};
 
 fn read_file(path: &PathBuf) -> Option<String> {
     let contents = fs::read_to_string(path).unwrap();
@@ -18,13 +18,13 @@ fn read_file(path: &PathBuf) -> Option<String> {
             "content": "<p>This is a liquid-rendered website</p>"
             });
             Some(template.render(&globals).unwrap())
-        },
+        }
         "md" => {
-          let parser = Parser::new_ext(&contents, Options::all());
-          let mut html_output = String::new();
-          html::push_html(&mut html_output, parser);
-          Some(html_output)
-        },
+            let parser = Parser::new_ext(&contents, Options::all());
+            let mut html_output = String::new();
+            html::push_html(&mut html_output, parser);
+            Some(html_output)
+        }
         _ => None,
     }
 }
@@ -45,7 +45,7 @@ fn read_dir(dir: PathBuf, out_dir: &PathBuf) -> Result<(), Box<dyn std::error::E
             if let Some(output) = output {
                 let mut out_file = out_dir.join(path.file_name().unwrap());
                 out_file.set_extension("html");
-
+                println!("Writing {}", out_file.to_str().unwrap());
                 fs::write(out_file, output)?;
             }
         } else {
