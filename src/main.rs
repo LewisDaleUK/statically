@@ -2,10 +2,17 @@ use pulldown_cmark::{html, Options, Parser};
 use std::fs;
 use std::path::{Path, PathBuf};
 
+mod frontmatter;
+
 fn read_file(path: &PathBuf) -> Option<String> {
     let contents = fs::read_to_string(path).unwrap();
 
     let extension = path.extension().unwrap();
+
+    // TODO: The frontmatter library also gives us document contents as a parameter,
+    // This flow should be rewritten so the parse happens at the top-level
+    let data = frontmatter::FrontMatter::from_str(&contents);
+    println!("{:#?}", data);
 
     match extension.to_str().unwrap() {
         "html" => {

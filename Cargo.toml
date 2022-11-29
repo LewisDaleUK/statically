@@ -8,6 +8,8 @@ edition = "2021"
 [dependencies]
 liquid = "0.26.0"
 pulldown-cmark = "0.9.2"
+serde = { version = "1.0.148", features = [ "derive" ] }
+yaml-front-matter = "0.1.0"
 
 [profile.release]
 opt-level = 3
