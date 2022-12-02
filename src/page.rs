@@ -1,10 +1,9 @@
-use pulldown_cmark::{html, Options, Parser};
-use gray_matter::Matter;
 use gray_matter::engine::YAML;
+use gray_matter::Matter;
+use pulldown_cmark::{html, Options, Parser};
 use serde::{Deserialize, Serialize};
 use std::fs;
-use std::path::{ Path, PathBuf };
-use yaml_front_matter::YamlFrontMatter;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug)]
 pub struct GlobalData {
@@ -86,7 +85,7 @@ impl Page {
                 let mut html_output = String::new();
                 html::push_html(&mut html_output, parser);
                 Some(html_output)
-            },
+            }
             _ => None,
         };
 
@@ -96,7 +95,7 @@ impl Page {
                 println!("Attempting to read layout {:#?}", path);
                 let layout_page = Page::read(&path);
                 layout_page.render(dirs, GlobalData { content: content })
-            },
+            }
             _ => content,
         }
     }

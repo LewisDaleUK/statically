@@ -8,7 +8,11 @@ fn read_file(path: &PathBuf, dirs: &page::Dirs) -> Option<String> {
     page.render(dirs, page::GlobalData::empty())
 }
 
-fn read_dir(dir: &PathBuf, out_dir: &PathBuf, dirs: &page::Dirs) -> Result<(), Box<dyn std::error::Error>> {
+fn read_dir(
+    dir: &PathBuf,
+    out_dir: &PathBuf,
+    dirs: &page::Dirs,
+) -> Result<(), Box<dyn std::error::Error>> {
     if dir.starts_with(&dirs.includes.as_path()) {
         return Ok(());
     }
@@ -38,7 +42,7 @@ fn read_dir(dir: &PathBuf, out_dir: &PathBuf, dirs: &page::Dirs) -> Result<(), B
             read_dir(
                 &entry.path(),
                 &out_dir.join(entry.path().file_name().unwrap()),
-                dirs
+                dirs,
             )?;
         }
     }
@@ -55,7 +59,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let dirs = page::Dirs {
         includes: includes_dir,
         output: out_dir,
-        input: source_dir
+        input: source_dir,
     };
 
     if !dirs.output.exists() {
