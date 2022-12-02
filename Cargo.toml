@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+gray_matter = "0.2.4"
 liquid = "0.26.0"
 pulldown-cmark = "0.9.2"
 serde = { version = "1.0.148", features = [ "derive" ] }

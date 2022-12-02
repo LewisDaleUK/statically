@@ -1,8 +1,28 @@
 use pulldown_cmark::{html, Options, Parser};
+use gray_matter::Matter;
+use gray_matter::engine::YAML;
 use serde::{Deserialize, Serialize};
 use std::fs;
-use std::path::PathBuf;
+use std::path::{ Path, PathBuf };
 use yaml_front_matter::YamlFrontMatter;
+
+#[derive(Debug)]
+pub struct GlobalData {
+    content: Option<String>,
+}
+
+impl GlobalData {
+    pub fn empty() -> GlobalData {
+        GlobalData { content: None }
+    }
+}
+
+#[derive(Debug)]
+pub struct Dirs {
+    pub output: PathBuf,
+    pub input: PathBuf,
+    pub includes: PathBuf,
+}
 
 #[derive(Deserialize, Serialize, Debug, PartialEq, Eq)]
 pub struct FrontMatter {
@@ -21,11 +41,12 @@ pub struct Page {
 impl Page {
     pub fn read(path: &PathBuf) -> Page {
         let file_contents = fs::read_to_string(path).unwrap();
+        let matter = Matter::<YAML>::new();
 
-        if let Ok(result) = YamlFrontMatter::parse::<FrontMatter>(&file_contents) {
+        if let Some(result) = matter.parse_with_struct::<FrontMatter>(&file_contents) {
             Page {
                 raw: String::from(&file_contents),
-                data: result.metadata,
+                data: result.data,
                 path: path.clone(),
                 contents: result.content,
             }
@@ -42,26 +63,41 @@ impl Page {
         }
     }
 
-    pub fn render(&self) -> Option<String> {
-        match self.path.extension().unwrap().to_str().unwrap() {
-            "html" => {
-                if let Ok(template) = liquid::ParserBuilder::with_stdlib()
-                    .build()
-                    .unwrap()
-                    .parse(self.raw.as_str())
-                {
-                    let globals = liquid::object!({});
-                    return Some(template.render(&globals).unwrap());
-                }
-                None
-            }
+    fn parse_liquid(&self, globals: GlobalData) -> Option<String> {
+        if let Ok(template) = liquid::ParserBuilder::with_stdlib()
+            .build()
+            .unwrap()
+            .parse(&self.contents.as_str())
+        {
+            let data = liquid::object!({
+                "content": globals.content.unwrap_or(String::from(""))
+            });
+            return Some(template.render(&data).unwrap());
+        }
+        None
+    }
+
+    pub fn render(&self, dirs: &Dirs, globals: GlobalData) -> Option<String> {
+        let content = match self.path.extension().unwrap().to_str().unwrap() {
+            "html" => self.parse_liquid(globals),
+            "liquid" => self.parse_liquid(globals),
             "md" => {
                 let parser = Parser::new_ext(&self.contents, Options::all());
                 let mut html_output = String::new();
                 html::push_html(&mut html_output, parser);
                 Some(html_output)
-            }
+            },
             _ => None,
+        };
+
+        match &self.data.layout {
+            Some(layout) => {
+                let path = dirs.includes.join(Path::new(layout));
+                println!("Attempting to read layout {:#?}", path);
+                let layout_page = Page::read(&path);
+                layout_page.render(dirs, GlobalData { content: content })
+            },
+            _ => content,
         }
     }
 }

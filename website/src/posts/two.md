@@ -1,3 +1,6 @@
+---
+layout: layout.liquid
+---
 # This is also a test
 
 This is my second test page.
