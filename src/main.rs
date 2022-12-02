@@ -9,11 +9,11 @@ fn read_file(path: &PathBuf, dirs: &page::Dirs) -> Option<String> {
 }
 
 fn read_dir(
-    dir: &PathBuf,
+    dir: &Path,
     out_dir: &PathBuf,
     dirs: &page::Dirs,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    if dir.starts_with(&dirs.includes.as_path()) {
+    if dir.starts_with(dirs.includes.as_path()) {
         return Ok(());
     }
 

@@ -66,10 +66,10 @@ impl Page {
         if let Ok(template) = liquid::ParserBuilder::with_stdlib()
             .build()
             .unwrap()
-            .parse(&self.contents.as_str())
+            .parse(self.contents.as_str())
         {
             let data = liquid::object!({
-                "content": globals.content.unwrap_or(String::from(""))
+                "content": globals.content.unwrap_or_else(|| String::from(""))
             });
             return Some(template.render(&data).unwrap());
         }
@@ -94,7 +94,7 @@ impl Page {
                 let path = dirs.includes.join(Path::new(layout));
                 println!("Attempting to read layout {:#?}", path);
                 let layout_page = Page::read(&path);
-                layout_page.render(dirs, GlobalData { content: content })
+                layout_page.render(dirs, GlobalData { content })
             }
             _ => content,
         }
@@ -127,7 +127,7 @@ mod tests {
 		",
         );
 
-        assert!(fs::write(&path, &contents).is_ok());
+        assert!(fs::write(path, &contents).is_ok());
 
         let expected = Page {
             raw: String::from(&contents),
@@ -164,7 +164,7 @@ This is my second-level content
 * List item 2
 * List item 3";
 
-        assert!(fs::write(&path, &contents).is_ok());
+        assert!(fs::write(path, contents).is_ok());
 
         let expected = Page {
             raw: String::from(contents),
